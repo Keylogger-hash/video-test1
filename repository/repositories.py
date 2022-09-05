@@ -1,4 +1,5 @@
 import abc
+from re import A
 from repository import models
 from pydantic import UUID4
 from aiofiles import os as aios
@@ -13,7 +14,12 @@ class AbstractRepository(abc.ABC):
     @abc.abstractmethod
     async def get(self):
         raise NotImplementedError
-    
+
+    @abc.abstractmethod
+    async def update(self):
+        raise NotImplementedError
+
+
     @abc.abstractmethod
     async def save(self):
         raise NotImplementedError
@@ -57,6 +63,9 @@ class FileInfoRepository(AbstractRepository):
     async def save(self):
         pass
 
+    async def update(self):
+        pass
+
     async def get(self):
         pass
 
@@ -86,6 +95,9 @@ class RedisFileInfoRepository(FileInfoRepository):
     async def get(self, key):
         return await self.db.get(key)
 
+    async def update(self, key, value):
+        return await self.db.set(key, value)
+
     def build_url(self):
         url = f"{self.db_type}://{self.host}:{self.port}/{self.db}"
         return url
@@ -95,15 +107,3 @@ class RedisFileInfoRepository(FileInfoRepository):
         self.db = await aioredis.from_url(url)
 
 
-# class RedisFileRepository(FileRepository):
-#     def __init__(self):
-#         pass 
-
-#     def delete(self,id:UUID4):
-#         pass
-
-#     def get(self,id:UUID4):
-#         pass 
-    
-#     def save(self):
-#         pass 

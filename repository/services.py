@@ -1,5 +1,6 @@
 from repository.repositories import FileInfoRepository, FileRepository, RedisFileInfoRepository
 from repository.config import REDIS_HOST,REDIS_PORT,REDIS_DB,REDIS_TYPE
+import redis
 import ujson
 from repository import models
 
@@ -25,6 +26,15 @@ async def get_fileinfo_redis(id):
     fileinfo = await repo.get(id)
     return fileinfo
     
+async def update_fileinfo_redis_start_processing(id,fileinfo:dict):
+    repo = RedisFileInfoRepository(db_type=REDIS_TYPE,host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
+    await repo.create_engine()
+    fileinfo["processing"] = True
+    fileinfo["processingProgress"] = 0
+    await repo.update(id,fileinfo)
+
+    
+
 async def delete_fileinfo_redis(id):
     repo = RedisFileInfoRepository(db_type=REDIS_TYPE,host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
     filerepo = FileRepository()
@@ -40,4 +50,11 @@ async def delete_fileinfo_redis(id):
         await filerepo.delete(filename)
         return True
         
-    
+def update_fileinfo_processing_ready(id):
+    r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
+    r.set(id)
+    # repo = RedisFileInfoRepository(db_type=REDIS_TYPE,host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
+    # await repo.create_engine()
+    # fileinfo["processing"] = True
+    # fileinfo["processingProgress"] = 0
+    # await repo.update(id,fileinfo)

@@ -4,11 +4,16 @@ import os
 import aioredis
 import ujson
 import uuid
+from validation_models.base_models import FileResizeFormat
+from video_processing_tasks.processing_tasks import processing_video_resize
 from repository.services import save_fileinfo_redis,save_file, get_fileinfo_redis,delete_fileinfo_redis
 
 app = FastAPI()
-# r = redis.Redis(host='localhost',port='6379',db='0')
 
+
+@app.get("/")
+async def healthy():
+    return {"status":"OK","status_code":200}
 
 
 @app.post("/file")
@@ -27,8 +32,17 @@ async def upload_file(file: UploadFile = File(...)):
         return {"id":uuid4}
 
 @app.patch("/file/{id}")
-async def processing_file(id: str):
-    pass
+async def processing_file(id: str,format:FileResizeFormat):
+    fileinfo = await get_fileinfo_redis(id)
+    if fileinfo is None:
+        return {"success":False,"error":f"{id} video not found"}
+    else:
+        file_data = ujson.loads(fileinfo)
+        filename = file_data["pathfilename"]
+        width = format.width
+        height = format.height
+        processing_video_resize.delay(filename,width,height)
+        return {"success":True}
 
 @app.get("/{id}")
 async def get_fileinfo(id: str):
