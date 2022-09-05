@@ -38,10 +38,9 @@ async def processing_file(id: str,format:FileResizeFormat):
         return {"success":False,"error":f"{id} video not found"}
     else:
         file_data = ujson.loads(fileinfo)
-        filename = file_data["pathfilename"]
         width = format.width
         height = format.height
-        processing_video_resize.delay(filename,width,height)
+        processing_video_resize.delay(id,file_data,width,height)
         return {"success":True}
 
 @app.get("/{id}")

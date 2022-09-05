@@ -41,6 +41,9 @@ class FileRepository(AbstractRepository):
     async def get(self):
         pass 
 
+    async def update(self):
+        pass
+
     async def delete(self,pathfilename):
         await aios.remove(pathfilename)
 

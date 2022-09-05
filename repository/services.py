@@ -26,12 +26,7 @@ async def get_fileinfo_redis(id):
     fileinfo = await repo.get(id)
     return fileinfo
     
-async def update_fileinfo_redis_start_processing(id,fileinfo:dict):
-    repo = RedisFileInfoRepository(db_type=REDIS_TYPE,host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
-    await repo.create_engine()
-    fileinfo["processing"] = True
-    fileinfo["processingProgress"] = 0
-    await repo.update(id,fileinfo)
+
 
     
 
@@ -49,12 +44,18 @@ async def delete_fileinfo_redis(id):
         await repo.delete(id)
         await filerepo.delete(filename)
         return True
-        
-def update_fileinfo_processing_ready(id):
-    r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
-    r.set(id)
-    # repo = RedisFileInfoRepository(db_type=REDIS_TYPE,host=REDIS_HOST,port=REDIS_PORT,db_name=REDIS_DB)
-    # await repo.create_engine()
-    # fileinfo["processing"] = True
-    # fileinfo["processingProgress"] = 0
-    # await repo.update(id,fileinfo)
+
+def update_fileinfo_redis_start_processing(key,fileinfo:dict):
+    r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT)
+    fileinfo["processing"] = True
+    fileinfo["processingProgress"] = 0
+    json_data = ujson.dumps(fileinfo)
+    r.set(key,json_data)
+
+def update_fileinfo_processing_ready(key,fileinfo):
+    r = redis.Redis(host=REDIS_HOST,port=REDIS_PORT)
+    fileinfo["processing"] = False 
+    fileinfo["processingProgress"] = 100
+    json_data = ujson.dumps(fileinfo)
+    r.set(key, json_data)
+    
