@@ -45,8 +45,10 @@ class FileRepository(AbstractRepository):
         pass
 
     async def delete(self,pathfilename):
-        await aios.remove(pathfilename)
-
+        try:
+            await aios.remove(pathfilename)
+        except FileNotFoundError:
+            print("file not found")
 
 
 class FileInfoRepository(AbstractRepository):

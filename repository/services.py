@@ -1,5 +1,5 @@
 from repository.repositories import FileInfoRepository, FileRepository, RedisFileInfoRepository
-from repository.config import REDIS_HOST,REDIS_PORT,REDIS_DB,REDIS_TYPE
+from video_test.config import REDIS_HOST,REDIS_PORT,REDIS_DB,REDIS_TYPE
 import redis
 import ujson
 from repository import models
@@ -15,8 +15,6 @@ async def save_fileinfo_redis(id,path_filename,filename,extension):
     key = fileinfo.id
     data_for_dump = fileinfo.to_json()
     value = ujson.dumps(data_for_dump)
-    print(key)
-    print(value)
     await repo.save(key, value)
 
 
@@ -35,7 +33,6 @@ async def delete_fileinfo_redis(id):
     filerepo = FileRepository()
     await repo.create_engine()
     fileinfo = await repo.get(id)
-    print(fileinfo)
     if fileinfo is None:
         return False
     else:

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File,UploadFile
-from repository.config import VIDEOS_DIR
+from video_test.config import VIDEOS_DIR, BASE_DIR
 import os 
 import aioredis
 import ujson
@@ -9,6 +9,7 @@ from video_processing_tasks.processing_tasks import processing_video_resize
 from repository.services import save_fileinfo_redis,save_file, get_fileinfo_redis,delete_fileinfo_redis
 
 app = FastAPI()
+
 
 
 @app.get("/")
@@ -25,7 +26,7 @@ async def upload_file(file: UploadFile = File(...)):
         uuid4 = str(uuid.uuid4())
         extension = file.content_type.split("/")[1]
         filename = f"{str(uuid4)}.{extension}"
-        path_filename = os.path.join(VIDEOS_DIR,filename)
+        path_filename = os.path.join(BASE_DIR,VIDEOS_DIR,filename)
         file.filename = path_filename
         await save_fileinfo_redis(uuid4,path_filename,filename,extension)
         await save_file(file)
